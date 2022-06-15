@@ -1,0 +1,202 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: demo-wordpress-mysql
+---
+#WORDPRESS
+apiVersion: v1
+kind: Service
+metadata:
+  name: wordpress
+  labels:
+    app: wordpress
+spec:
+  ports:
+    - port: 80
+  selector:
+    app: wordpress
+    tier: frontend
+  type: LoadBalancer
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: wp-pv-claim
+  namespace: demo-wordpress-mysql
+  labels:
+    app: wordpress
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 20Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: wordpress
+  namespace: demo-wordpress-mysql
+  labels:
+    app: wordpress
+spec:
+  selector:
+    matchLabels:
+      app: wordpress
+      tier: frontend
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: wordpress
+        tier: frontend
+    spec:
+      serviceAccountName: sa-wordpress
+      containers:
+      - image: wordpress:php8.0-apache
+        name: wordpress
+        env:
+        - name: WORDPRESS_DB_HOST
+          value: wordpress-mysql
+        - name: WORDPRESS_DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mysql-pass
+              key: password
+        - name: WORDPRESS_DB_NAME
+          value: mysql
+        - name: WORDPRESS_DB_USER
+          value: root
+        ports:
+        - containerPort: 80
+          name: wordpress
+        volumeMounts:
+        - name: wordpress-persistent-storage
+          mountPath: /var/www/html
+      volumes:
+      - name: wordpress-persistent-storage
+        persistentVolumeClaim:
+          claimName: wp-pv-claim
+---
+#MYSQL
+apiVersion: v1
+kind: Service
+metadata:
+  name: wordpress-mysql
+  labels:
+    app: wordpress
+spec:
+  ports:
+    - port: 3306
+  selector:
+    app: wordpress
+    tier: mysql
+  clusterIP: None
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mysql-pv-claim
+  namespace: demo-wordpress-mysql
+  labels:
+    app: wordpress
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 20Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: wordpress-mysql
+  namespace: demo-wordpress-mysql
+  labels:
+    app: wordpress
+spec:
+  selector:
+    matchLabels:
+      app: wordpress
+      tier: mysql
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: wordpress
+        tier: mysql
+    spec:
+      serviceAccountName: sa-wordpress
+      containers:
+      - image: dockerhub-docker-remote.artifactory.fags.dir/mysql:latest
+        name: mysql
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mysql-pass
+              key: password
+        ports:
+        - containerPort: 3306
+          name: mysql
+        volumeMounts:
+        - name: mysql-persistent-storage
+          mountPath: /var/lib/mysql
+      volumes:
+      - name: mysql-persistent-storage
+        persistentVolumeClaim:
+          claimName: mysql-pv-claim
+---
+kind: Secret
+apiVersion: v1
+metadata:
+  name: mysql-pass
+  namespace: demo-wordpress-mysql
+data:
+  password: VGVzdDEyMzQ=
+type: Opaque
+---
+kind: ServiceAccount
+apiVersion: v1
+metadata:
+  name: sa-wordpress
+  namespace: demo-wordpress-mysql
+imagePullSecrets:
+  - name: image-pull-secret-docker-hub
+---
+apiVersion: v1
+data:
+  .dockerconfigjson: eyJhdXRocyI6eyJkb2NrZXJodWItZG9ja2VyLXJlbW90ZS5hcnRpZmFjdG9yeS5mYWdzLmRpciI6eyJ1c2VybmFtZSI6ImphaG5wYSIsInBhc3N3b3JkIjoiT3BlbnNoM2Z0aXN0Z2VpbCEiLCJhdXRoIjoiYWbCI6IiJ9fX0=
+kind: Secret
+metadata:
+  name: image-pull-secret-docker-hub
+  namespace: demo-wordpress-mysql
+type: kubernetes.io/dockerconfigjson
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: system:openshift:scc:anyuid
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: system:openshift:scc:anyuid
+subjects:
+- kind: ServiceAccount
+  name: sa-wordpress
+  namespace: demo-wordpress-mysql
+---
+kind: Route
+apiVersion: route.openshift.io/v1
+metadata:
+  name: demo-wordpress
+  namespace: demo-wordpress-mysql
+spec:
+  to:
+    kind: Service
+    name: wordpress
+  port:
+    targetPort: 80
+  wildcardPolicy: None
