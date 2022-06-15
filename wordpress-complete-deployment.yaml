@@ -130,7 +130,7 @@ spec:
     spec:
       serviceAccountName: sa-wordpress
       containers:
-      - image: dockerhub-docker-remote.artifactory.fags.dir/mysql:latest
+      - image: mysql:latest
         name: mysql
         env:
         - name: MYSQL_ROOT_PASSWORD
