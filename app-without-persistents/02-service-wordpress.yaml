@@ -1,0 +1,14 @@
+#WORDPRESS
+apiVersion: v1
+kind: Service
+metadata:
+  name: wordpress-without-persistence
+  labels:
+    app: wordpress-without-persistence
+spec:
+  ports:
+    - port: 80
+  selector:
+    app: wordpress-without-persistence
+    tier: frontend
+  type: LoadBalancer

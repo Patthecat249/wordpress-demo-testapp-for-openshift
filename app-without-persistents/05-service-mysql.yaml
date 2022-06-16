@@ -1,0 +1,14 @@
+#MYSQL
+apiVersion: v1
+kind: Service
+metadata:
+  name: wordpress-mysql-without-persistence
+  labels:
+    app: wordpress-without-persistence
+spec:
+  ports:
+    - port: 3306
+  selector:
+    app: wordpress-without-persistence
+    tier: mysql
+  clusterIP: None
