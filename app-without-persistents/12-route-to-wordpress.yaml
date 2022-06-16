@@ -1,7 +1,7 @@
 kind: Route
 apiVersion: route.openshift.io/v1
 metadata:
-  name: demo-wordpress-without-persistence
+  name: demo-wop
   namespace: demo-wordpress-mysql-without-persistence
 spec:
   to:
