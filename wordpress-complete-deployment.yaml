@@ -62,7 +62,7 @@ spec:
         - name: WORDPRESS_DB_PASSWORD
           valueFrom:
             secretKeyRef:
-              name: mysql-pass
+              name: mysql-password
               key: password
         - name: WORDPRESS_DB_NAME
           value: mysql
@@ -136,7 +136,7 @@ spec:
         - name: MYSQL_ROOT_PASSWORD
           valueFrom:
             secretKeyRef:
-              name: mysql-pass
+              name: mysql-password
               key: password
         ports:
         - containerPort: 3306
@@ -152,7 +152,7 @@ spec:
 kind: Secret
 apiVersion: v1
 metadata:
-  name: mysql-pass
+  name: mysql-password
   namespace: demo-wordpress-mysql
 data:
   password: VGVzdDEyMzQ=

@@ -1,21 +1,21 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: wordpress-mysql-without-persistence
+  name: mysql-without-persistence
   namespace: demo-wordpress-mysql-without-persistence
   labels:
-    app: wordpress-without-persistence
+    app: mysql-without-persistence
 spec:
   selector:
     matchLabels:
-      app: wordpress-without-persistence
+      app: mysql-without-persistence
       tier: mysql
   strategy:
     type: Recreate
   template:
     metadata:
       labels:
-        app: wordpress-without-persistence
+        app: mysql-without-persistence
         tier: mysql
     spec:
       serviceAccountName: sa-wordpress-without-persistence
@@ -26,7 +26,7 @@ spec:
         - name: MYSQL_ROOT_PASSWORD
           valueFrom:
             secretKeyRef:
-              name: mysql-pass
+              name: mysql-password
               key: password
         ports:
         - containerPort: 3306
