@@ -1,0 +1,12 @@
+kind: Route
+apiVersion: route.openshift.io/v1
+metadata:
+  name: demo-wordpress
+  namespace: demo-wordpress-mysql
+spec:
+  to:
+    kind: Service
+    name: wordpress
+  port:
+    targetPort: 80
+  wildcardPolicy: None
