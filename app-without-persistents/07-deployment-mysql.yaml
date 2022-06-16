@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: wordpress-mysql
+  name: wordpress-mysql-without-persistence
   namespace: demo-wordpress-mysql-without-persistence
   labels:
     app: wordpress-without-persistence
