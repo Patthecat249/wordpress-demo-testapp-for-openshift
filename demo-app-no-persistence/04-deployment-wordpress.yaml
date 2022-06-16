@@ -24,7 +24,7 @@ spec:
         name: wordpress-without-persistence
         env:
         - name: WORDPRESS_DB_HOST
-          value: wordpress-mysql-without-persistence
+          value: mysql-without-persistence
         - name: WORDPRESS_DB_PASSWORD
           valueFrom:
             secretKeyRef:
