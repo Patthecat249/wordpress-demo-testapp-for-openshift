@@ -21,7 +21,7 @@ spec:
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: wp-pv-claim
+  name: pvc-wordpress
   namespace: demo-wordpress-mysql
   labels:
     app: wordpress
@@ -77,7 +77,7 @@ spec:
       volumes:
       - name: wordpress-persistent-storage
         persistentVolumeClaim:
-          claimName: wp-pv-claim
+          claimName: pvc-wordpress
 ---
 #MYSQL
 apiVersion: v1
@@ -97,7 +97,7 @@ spec:
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: mysql-pv-claim
+  name: pvc-mysql
   namespace: demo-wordpress-mysql
   labels:
     app: wordpress
@@ -147,7 +147,7 @@ spec:
       volumes:
       - name: mysql-persistent-storage
         persistentVolumeClaim:
-          claimName: mysql-pv-claim
+          claimName: pvc-mysql
 ---
 kind: Secret
 apiVersion: v1

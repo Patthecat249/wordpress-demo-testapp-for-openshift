@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: wp-pv-claim
+  name: pvc-wordpress
   namespace: demo-wordpress-mysql
   labels:
     app: wordpress
