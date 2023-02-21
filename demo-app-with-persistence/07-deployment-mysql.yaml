@@ -34,6 +34,23 @@ spec:
         volumeMounts:
         - name: mysql-persistent-storage
           mountPath: /var/lib/mysql
+#        livenessProbe:
+#          tcpSocket:
+#            #host: 'mysql.demo-wordpress-mysql.svc.cluster.local'
+#            port: 3306
+        readinessProbe:
+          exec:
+            command:
+              - sh
+              - '-c'
+              - /usr/bin/mysql -uroot -pTest1234
+              - '-e'
+              - show databases;
+          initialDelaySeconds: 30
+          periodSeconds: 20
+          timeoutSeconds: 10
+          successThreshold: 2
+          failureThreshold: 10
       volumes:
       - name: mysql-persistent-storage
         persistentVolumeClaim:

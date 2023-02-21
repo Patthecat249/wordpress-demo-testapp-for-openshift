@@ -19,8 +19,23 @@ spec:
         tier: frontend
     spec:
       serviceAccountName: sa-wordpress
+      initContainers:
+      - name: init-mysql
+        image: busybox
+        command: ['sh', '-c', 'until nslookup mysql.demo-wordpress-mysql.svc.cluster.local; do echo waiting for mysql; sleep 2; done;']
       containers:
       - image: wordpress:php8.0-apache
+        livenessProbe:
+          tcpSocket:
+            port: 80
+        readinessProbe:
+          tcpSocket:
+            port: 80
+          initialDelaySeconds: 30
+          periodSeconds: 20
+          timeoutSeconds: 10
+          successThreshold: 1
+          failureThreshold: 1
         name: wordpress
         env:
         - name: WORDPRESS_DB_HOST
