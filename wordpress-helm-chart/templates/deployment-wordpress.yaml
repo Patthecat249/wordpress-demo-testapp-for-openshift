@@ -1,0 +1,61 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "wordpress-helm-chart.fullname" . }}
+  labels:
+    {{- include "wordpress-helm-chart.labels" . | nindent 4 }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "wordpress-helm-chart.selectorLabels" . | nindent 6 }}
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        {{- include "wordpress-helm-chart.labels" . | nindent 8 }}
+	{{- with .Values.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      serviceAccountName: {{ include "wordpress-helm-chart.serviceAccountName" . }}
+      initContainers:
+      - name: init-mysql
+        image: busybox
+        command: ['sh', '-c', 'until nslookup {{ .Values.mysql.name }}.{{ .Values.namespace.name }}.svc.cluster.local; do echo I am waiting for the MySQL-Pod to come up and running and I am checking this every 5seconds; sleep 5; done;']
+      containers:
+      - image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+        livenessProbe:
+          tcpSocket:
+            port: {{ .Values.service.port }}
+        readinessProbe:
+          tcpSocket:
+            port: {{ .Values.service.port }}
+          initialDelaySeconds: 30
+          periodSeconds: 20
+          timeoutSeconds: 10
+          successThreshold: 1
+          failureThreshold: 1
+        name: {{ .Chart.Name }}
+        env:
+        - name: WORDPRESS_DB_HOST
+          value: mysql
+        - name: WORDPRESS_DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mysql-password
+              key: password
+        - name: WORDPRESS_DB_NAME
+          value: mysql
+        - name: WORDPRESS_DB_USER
+          value: root
+        ports:
+        - containerPort: {{ .Values.service.port }}
+          name: wordpress
+        volumeMounts:
+        - name: wordpress-persistent-storage
+          mountPath: /var/www/html
+      volumes:
+      - name: wordpress-persistent-storage
+        persistentVolumeClaim:
+          claimName: {{ .Values.pvc.claimname_wordpress }}

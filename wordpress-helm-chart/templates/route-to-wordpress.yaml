@@ -1,0 +1,11 @@
+kind: Route
+apiVersion: route.openshift.io/v1
+metadata:
+  name: {{ include "wordpress-helm-chart.fullname" . }}
+spec:
+  to:
+    kind: Service
+    name: {{ include "wordpress-helm-chart.fullname" . }}
+  port:
+    targetPort: {{ .Values.service.port }}
+  wildcardPolicy: None

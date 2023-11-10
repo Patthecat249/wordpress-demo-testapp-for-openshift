@@ -1,0 +1,13 @@
+#WORDPRESS
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "wordpress-helm-chart.fullname" . }}
+  labels:
+    {{- include "wordpress-helm-chart.labels" . | nindent 4 }}
+spec:
+  ports:
+    - port: {{ .Values.service.port }}
+  selector:
+    {{- include "wordpress-helm-chart.selectorLabels" . | nindent 4 }}
+  type: LoadBalancer

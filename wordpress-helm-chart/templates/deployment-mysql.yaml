@@ -1,0 +1,56 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.mysql.name }}
+  labels:
+    app: {{ .Values.mysql.name }}
+spec:
+  selector:
+    matchLabels:
+      app: {{ .Values.mysql.name }}
+      tier: {{ .Values.mysql.name }}
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.mysql.name }}
+        tier: {{ .Values.mysql.name }}
+    spec:
+      serviceAccountName: {{ .Values.serviceAccount.name }}
+      containers:
+      - image: mysql:latest
+        name: {{ .Values.mysql.name }}
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mysql-password
+              key: password
+        ports:
+        - containerPort: {{ .Values.mysql.port }}
+          name: {{ .Values.mysql.name }}
+        volumeMounts:
+        - name: mysql-persistent-storage
+          mountPath: /var/lib/mysql
+#        livenessProbe:
+#          tcpSocket:
+#            #host: 'mysql.demo-wordpress-mysql.svc.cluster.local'
+#            port: 3306
+        readinessProbe:
+          exec:
+            command:
+              - sh
+              - '-c'
+              - /usr/bin/mysql -uroot -pTest1234
+              - '-e'
+              - show databases;
+          initialDelaySeconds: 30
+          periodSeconds: 20
+          timeoutSeconds: 10
+          successThreshold: 2
+          failureThreshold: 10
+      volumes:
+      - name: mysql-persistent-storage
+        persistentVolumeClaim:
+          claimName: {{ .Values.pvc.claimname_mysql }}
