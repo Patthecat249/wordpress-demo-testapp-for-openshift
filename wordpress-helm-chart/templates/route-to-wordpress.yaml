@@ -2,6 +2,7 @@ kind: Route
 apiVersion: route.openshift.io/v1
 metadata:
   name: {{ include "wordpress-helm-chart.fullname" . }}
+  namespace: {{ .Release.Namespace }}
 spec:
   to:
     kind: Service

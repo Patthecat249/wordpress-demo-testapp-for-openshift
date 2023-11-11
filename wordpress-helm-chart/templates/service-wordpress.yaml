@@ -3,6 +3,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: {{ include "wordpress-helm-chart.fullname" . }}
+  namespace: {{ .Release.Namespace }}
   labels:
     {{- include "wordpress-helm-chart.labels" . | nindent 4 }}
 spec:

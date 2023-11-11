@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ include "wordpress-helm-chart.fullname" . }}
+  namespace: {{ .Release.Namespace }}
   labels:
     {{- include "wordpress-helm-chart.labels" . | nindent 4 }}
 spec:
@@ -22,7 +23,7 @@ spec:
       initContainers:
       - name: init-mysql
         image: busybox
-        command: ['sh', '-c', 'until nslookup {{ .Values.mysql.name }}.{{ .Values.namespace.name }}.svc.cluster.local; do echo I am waiting for the MySQL-Pod to come up and running and I am checking this every 5seconds; sleep 5; done;']
+        command: ['sh', '-c', 'until nslookup {{ .Values.mysql.name }}.{{ .Release.Namespace }}.svc.cluster.local; do echo I am waiting for the MySQL-Pod to come up and running and I am checking this every 5seconds; sleep 5; done;']
       containers:
       - image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
         livenessProbe:
