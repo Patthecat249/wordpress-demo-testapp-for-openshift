@@ -53,8 +53,8 @@ mysql:
   password: VGVzdDEyMzQ= # base64-encoded
 
 # RoleBinding / ClusterRoleBinding
-crb:
-  name: crb-wordpress-mysql
+rb:
+  name: rb-wordpress-mysql
 
 podSecurityContext: {}
   # fsGroup: 2000
