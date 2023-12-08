@@ -11,4 +11,5 @@ spec:
     - port: {{ .Values.service.port }}
   selector:
     {{- include "wordpress-helm-chart.selectorLabels" . | nindent 4 }}
-  type: LoadBalancer
+  type: ClusterIP
+  clusterIP: None
